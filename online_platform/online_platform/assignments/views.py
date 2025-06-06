@@ -1,0 +1,108 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .models import Assignment, Task
+from .forms import AssignmentForm, TaskForm
+from .utils import auto_review_assignment, auto_fix_suggestions
+from django.contrib import messages
+from users.models import CustomUser
+
+@login_required
+def assignment_list(request):
+    if request.user.is_teacher:
+        assignments = Assignment.objects.all()
+    else:
+        assignments = Assignment.objects.filter(student=request.user)
+    return render(request, "assignments/list.html", {"assignments": assignments})
+
+@login_required
+def assignment_submit(request):
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.student = request.user
+            assignment.save()
+            return redirect("assignment_list")
+    else:
+        form = AssignmentForm()
+    return render(request, "assignments/submit.html", {"form": form})
+
+@login_required
+def assignment_approve(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    if request.user.is_teacher:
+        if request.method == "POST":
+            assignment.approved = True
+            assignment.grade = request.POST.get("grade")
+            assignment.save()
+            return redirect("assignment_list")
+    return render(request, "assignments/approve.html", {"assignment": assignment})
+
+def is_student(user):
+    return hasattr(user, 'role') and user.role == 'student'
+
+@login_required
+@user_passes_test(is_student)
+def upload_assignment(request):
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.student = request.user
+            assignment.save()
+
+            # apelăm auto-review
+            problems = auto_review_assignment(assignment)
+            suggestions = auto_fix_suggestions(assignment)
+
+            if problems:
+                for issue in problems:
+                    messages.warning(request, f"Auto-Review: {issue}")
+            else:
+                messages.success(request, "Auto-Review: Tema pare în regulă!")
+
+            if suggestions:
+                for fix in suggestions:
+                    messages.info(request, f"Sugestie Auto-Fix: {fix}")
+
+            return redirect("assignment_list")
+    else:
+        form = AssignmentForm()
+    return render(request, "assignments/upload.html", {"form": form})
+
+@login_required
+@user_passes_test(lambda u: hasattr(u, 'role') and u.role == 'teacher')
+def create_task(request):
+    if request.method == "POST":
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.created_by = request.user
+            task.save()
+            messages.success(request, "Task creat cu succes.")
+            return redirect("task_list")
+    else:
+        form = TaskForm()
+    return render(request, "assignments/create_task.html", {"form": form})
+
+@login_required
+def task_list(request):
+    tasks = Task.objects.all().order_by("-deadline")
+    return render(request, "assignments/task_list.html", {"tasks": tasks})
+
+@login_required
+@user_passes_test(is_student)
+def upload_assignment_for_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.student = request.user
+            assignment.task = task
+            assignment.save()
+            messages.success(request, "Tema a fost trimisă pentru acest task.")
+            return redirect("assignment_list")
+    else:
+        form = AssignmentForm()
+    return render(request, "assignments/upload.html", {"form": form, "task": task})

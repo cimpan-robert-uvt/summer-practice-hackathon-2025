@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Add Comment for: {{ assignment.title }}</h2>
+  <form method="post">{% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit">Add Comment</button>
+  </form>
+{% endblock %}

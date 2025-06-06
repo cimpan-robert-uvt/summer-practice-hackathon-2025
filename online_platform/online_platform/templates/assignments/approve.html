@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Approve Assignment</h2>
+<p><strong>{{ assignment.title }}</strong> by {{ assignment.student.username }}</p>
+<p>{{ assignment.content }}</p>
+{% if assignment.file %}<a href="{{ assignment.file.url }}">Download File</a>{% endif %}
+<form method="post">{% csrf_token %}
+  <label>Grade:</label>
+  <input type="number" step="0.01" name="grade" required>
+  <button type="submit">Approve</button>
+</form>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Lista Taskuri</h2>
+<ul>
+  {% for task in tasks %}
+    <li>
+      <strong>{{ task.title }}</strong> – deadline: {{ task.deadline|date:"d M Y H:i" }}<br>
+      {{ task.description }}<br>
+      <a href="{% url 'upload_assignment_for_task' task.id %}">Trimite temă</a>
+    </li>
+  {% empty %}
+    <li>Nu există taskuri disponibile.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
