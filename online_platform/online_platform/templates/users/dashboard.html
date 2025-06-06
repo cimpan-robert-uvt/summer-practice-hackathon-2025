@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+{% load crispy_forms_tags %}
+
   <h2>Welcome, {{ request.user.username }}</h2>
   {% if request.user.is_student %}<p>You are logged in as a student.</p>{% endif %}
   {% if request.user.is_teacher %}<p>You are logged in as a teacher.</p>{% endif %}

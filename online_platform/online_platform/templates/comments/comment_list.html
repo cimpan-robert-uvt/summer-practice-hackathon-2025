@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+{% load crispy_forms_tags %}
+
 <h2>Comments for: {{ assignment.title }}</h2>
 
 <a href="/assignments/">Back to Assignments</a>
@@ -14,10 +16,10 @@
 
 {% for comment in comments %}
   <div class="mb-3">
-    <strong>{{ comment.author.username }}</strong> said:
+    <strong>{{ comment.user.username }}</strong> said:
     <p>{{ comment.content }}</p>
     <small>Posted on {{ comment.created_at|date:"Y-m-d H:i" }}</small>
-    {% if comment.author == request.user %}
+    {% if comment.user == request.user %}
       <br><a href="{% url 'comment_edit' comment.id %}">Edit</a>
     {% endif %}
     <hr>

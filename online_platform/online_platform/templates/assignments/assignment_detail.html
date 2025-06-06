@@ -1,0 +1,22 @@
+<h2>Assignment details: {{ assignment.title }}</h2>
+<p>Status: {{ assignment.get_status_display }}</p>
+{% if assignment.approval_comment %}
+<p>Comentariu profesor: {{ assignment.approval_comment }}</p>
+{% endif %}
+<ul>
+  {% for comment in comments %}
+    <li>
+      <strong>{{ comment.user.username }}</strong> - {{ comment.created_at|date:"d M Y H:i" }}<br>
+      {{ comment.content|linebreaks }}
+      {% if comment.user == request.user %}
+        <br>
+        <a href="{% url 'edit_comment' comment.id %}">Edit</a> |
+        <a href="{% url 'delete_comment' comment.id %}">Delete</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No comments yet.</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'add_comment_to_assignment' assignment.id %}" class="btn btn-primary">Add comment</a>

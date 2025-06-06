@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Bine ai venit pe platforma e-learning!</h1>
+
+<nav>
+  <ul>
+    {% if user.is_authenticated %}
+      <li><a href="{% url 'task_list' %}">Task-uri</a></li>
+      <li><a href="{% url 'login' %}">Logout</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}">Login</a></li>
+      <li><a href="{% url 'register' %}">Register</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Task pending for approval</h2>
+<ul>
+  {% for assignment in assignments %}
+    <li>
+      <strong>{{ assignment.title }}</strong> de {{ assignment.student.username }} - 
+      <a href="{% url 'approve_assignment' assignment.id %}">Review</a>
+    </li>
+  {% empty %}
+    <li>No pending tasks.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

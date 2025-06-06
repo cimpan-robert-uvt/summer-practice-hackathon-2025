@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ho@a^&znzkp2sqr5s6ndo!yd7t58b=(&$c-%*^akc#f85z-*=9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'online_platform.urls'
@@ -80,11 +81,13 @@ WSGI_APPLICATION = 'online_platform.wsgi.application'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = '/login/'
+
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -136,6 +139,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

@@ -4,7 +4,9 @@ from .models import Assignment, Task
 from .forms import AssignmentForm, TaskForm
 from .utils import auto_review_assignment, auto_fix_suggestions
 from django.contrib import messages
-from users.models import CustomUser
+from comments.models import Comment
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 @login_required
 def assignment_list(request):
@@ -38,6 +40,15 @@ def assignment_approve(request, assignment_id):
             return redirect("assignment_list")
     return render(request, "assignments/approve.html", {"assignment": assignment})
 
+@login_required
+def assignment_detail(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    comments = assignment.comments.all().order_by("-created_at")
+    return render(request, "assignments/assignment_detail.html", {
+        "assignment": assignment,
+        "comments": comments,
+    })
+
 def is_student(user):
     return hasattr(user, 'role') and user.role == 'student'
 
@@ -51,7 +62,6 @@ def upload_assignment(request):
             assignment.student = request.user
             assignment.save()
 
-            # apelăm auto-review
             problems = auto_review_assignment(assignment)
             suggestions = auto_fix_suggestions(assignment)
 
@@ -106,3 +116,36 @@ def upload_assignment_for_task(request, task_id):
     else:
         form = AssignmentForm()
     return render(request, "assignments/upload.html", {"form": form, "task": task})
+
+@staff_member_required
+def review_assignments(request):
+    assignments = Assignment.objects.filter(status='pending').order_by('uploaded_at')
+    return render(request, "assignments/review_assignments.html", {"assignments": assignments})
+
+@staff_member_required
+def approve_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    if request.method == "POST":
+        status = request.POST.get("status")
+        comment = request.POST.get("approval_comment", "")
+        if status in ['approved', 'rejected']:
+            assignment.status = status
+            assignment.approval_comment = comment
+            assignment.save()
+            messages.success(request, f"Tema a fost {status}.")
+            return redirect("review_assignments")
+    return render(request, "assignments/approve_assignment.html", {"assignment": assignment})
+
+@login_required
+def upload_assignment(request):
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.student = request.user
+            assignment.save()
+            messages.success(request, "Tema încărcată cu succes.")
+            return redirect("assignment_list")
+    else:
+        form = AssignmentForm()
+    return render(request, "assignments/upload.html", {"form": form})

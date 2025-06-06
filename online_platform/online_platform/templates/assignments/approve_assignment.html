@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Review task: {{ assignment.title }}</h2>
+<p><strong>Student:</strong> {{ assignment.student.username }}</p>
+<p><strong>File:</strong> <a href="{{ assignment.file.url }}">Download</a></p>
+
+<form method="post">
+  {% csrf_token %}
+  <label>
+    Approval:
+    <select name="status">
+      <option value="approved">Approve</option>
+      <option value="rejected">Reject</option>
+    </select>
+  </label>
+  <br>
+  <label>
+    Comment (optional):
+    <textarea name="approval_comment" rows="4"></textarea>
+  </label>
+  <br>
+  <button type="submit">Send</button>
+</form>
+
+<a href="{% url 'review_assignments' %}">Back to the list</a>
+{% endblock %}
