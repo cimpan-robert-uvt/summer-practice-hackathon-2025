@@ -6,6 +6,9 @@ from .utils import auto_review_assignment, auto_fix_suggestions
 from django.contrib import messages
 from comments.models import Comment
 from django.contrib.admin.views.decorators import staff_member_required
+from users.models import CustomUser
+from django.shortcuts import render, get_object_or_404
+from .models import Task
 
 
 @login_required
@@ -89,7 +92,7 @@ def create_task(request):
             task = form.save(commit=False)
             task.created_by = request.user
             task.save()
-            messages.success(request, "Task creat cu succes.")
+            messages.success(request, "Task created.")
             return redirect("task_list")
     else:
         form = TaskForm()
@@ -111,7 +114,7 @@ def upload_assignment_for_task(request, task_id):
             assignment.student = request.user
             assignment.task = task
             assignment.save()
-            messages.success(request, "Tema a fost trimisă pentru acest task.")
+            messages.success(request, "Assignment sent.")
             return redirect("assignment_list")
     else:
         form = AssignmentForm()
@@ -132,7 +135,7 @@ def approve_assignment(request, assignment_id):
             assignment.status = status
             assignment.approval_comment = comment
             assignment.save()
-            messages.success(request, f"Tema a fost {status}.")
+            messages.success(request, f"Assignment {status}.")
             return redirect("review_assignments")
     return render(request, "assignments/approve_assignment.html", {"assignment": assignment})
 
@@ -144,8 +147,49 @@ def upload_assignment(request):
             assignment = form.save(commit=False)
             assignment.student = request.user
             assignment.save()
-            messages.success(request, "Tema încărcată cu succes.")
+            messages.success(request, "Assignment sent.")
             return redirect("assignment_list")
     else:
         form = AssignmentForm()
     return render(request, "assignments/upload.html", {"form": form})
+
+@login_required
+def assignment_create(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.student = request.user
+            assignment.task = task
+            assignment.save()
+            messages.success(request, "Assignment sent.")
+            return redirect("assignment_list")
+    else:
+        form = AssignmentForm()
+    return render(request, "assignments/upload.html", {"form": form, "task": task})
+
+@login_required
+@user_passes_test(lambda u: u.role == 'teacher')
+def create_task_for_student(request, student_id):
+    student = get_object_or_404(CustomUser, id=student_id, role='student')
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.assigned_to = student
+            task.created_by = request.user
+            task.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm()
+    return render(request, 'assignments/create_task_for_student.html', {'form': form, 'student': student})
+
+
+def task_detail(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+    return render(request, 'assignments/task_detail.html', {'task': task})
+
+def dashboard_teacher(request):
+    teacher_tasks = Task.objects.filter(created_by=request.user).select_related('assigned_to')
+    return render(request, 'users/dashboard_teacher.html', {'teacher_tasks': teacher_tasks})

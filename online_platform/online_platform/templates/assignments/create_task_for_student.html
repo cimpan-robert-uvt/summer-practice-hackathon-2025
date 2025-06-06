@@ -1,0 +1,10 @@
+<h2>Adaugă task pentru {{ student.username }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <small style="color: #888;">
+        Format deadline: <b>YYYY-MM-DD HH:MM</b> (ex: 2025-06-10 14:30)
+    </small>
+    <button type="submit">Creează task</button>
+</form>
+<a href="{% url 'search_students' %}">Înapoi la căutare</a>

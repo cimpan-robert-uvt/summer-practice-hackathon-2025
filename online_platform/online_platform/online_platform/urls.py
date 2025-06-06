@@ -19,16 +19,16 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from users import views as user_views
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("users/", include("users.urls")),
     path("assignments/", include("assignments.urls")),
-    path("admin/", admin.site.urls),
-    path("", include("users.urls")),
     path("comments/", include("comments.urls")),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-
+    path("admin/", admin.site.urls),
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
+    path('dashboard/', user_views.dashboard, name='dashboard'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

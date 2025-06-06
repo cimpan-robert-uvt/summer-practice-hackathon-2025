@@ -2,7 +2,7 @@
 {% block content %}
 <h2>Assignments</h2>
 {% if request.user.is_teacher or request.user.is_student %}
-  <td><a href="/comments/add/{{ a.id }}/">Comment</a></td>
+{% comment %} Comment link moved inside the for loop below {% endcomment %}
 {% endif %}
 
 {% if request.user.is_student %}<a href="/assignments/submit/">Submit New Assignment</a><br><br>{% endif %}
@@ -17,7 +17,9 @@
     <td>{% if a.approved %}Approved{% else %}Pending{% endif %}</td>
     <td>{{ a.grade|default:"-" }}</td>
     {% if request.user.is_teacher %}<td><a href="/assignments/approve/{{ a.id }}/">Approve</a></td>{% endif %}
-    <td><a href="/comments/add/{{ a.id }}/">Comment</a></td>
+    {% if request.user.is_teacher or request.user.is_student %}
+      <td><a href="/comments/add/{{ a.id }}/">Comment</a></td>
+    {% endif %}
   </tr>
   <tr>
     <td colspan="5">

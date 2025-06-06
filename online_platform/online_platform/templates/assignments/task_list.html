@@ -7,7 +7,7 @@
     <li>
       <strong>{{ task.title }}</strong> – deadline: {{ task.deadline|date:"d M Y H:i" }}<br>
       {{ task.description }}<br>
-      <a href="{% url 'upload_assignment_for_task' task.id %}">Send tesk.</a>
+      <a href="{% url 'upload_assignment_for_task' task.id %}">Send task.</a>
     </li>
   {% empty %}
     <li>No tasks available.</li>

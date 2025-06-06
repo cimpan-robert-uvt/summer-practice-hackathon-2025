@@ -1,22 +1,44 @@
-<h2>Assignment details: {{ assignment.title }}</h2>
-<p>Status: {{ assignment.get_status_display }}</p>
-{% if assignment.approval_comment %}
-<p>Comentariu profesor: {{ assignment.approval_comment }}</p>
-{% endif %}
-<ul>
-  {% for comment in comments %}
+{% extends "base.html" %}
+{% block content %}
+  <h2>Assignment details: {{ assignment.title }}</h2>
+  <p>Status: {{ assignment.get_status_display }}</p>
+  {% if assignment.approval_comment %}
+  <p>Comentariu profesor: {{ assignment.approval_comment }}</p>
+  {% endif %}
+  <ul>
+    {% for comment in comments %}
     <li>
       <strong>{{ comment.user.username }}</strong> - {{ comment.created_at|date:"d M Y H:i" }}<br>
       {{ comment.content|linebreaks }}
       {% if comment.user == request.user %}
-        <br>
-        <a href="{% url 'edit_comment' comment.id %}">Edit</a> |
-        <a href="{% url 'delete_comment' comment.id %}">Delete</a>
+      <br>
+      <a href="{% url 'edit_comment' comment.id %}">Edit</a> |
+      <a href="{% url 'delete_comment' comment.id %}">Delete</a>
       {% endif %}
     </li>
-  {% empty %}
+    {% empty %}
     <li>No comments yet.</li>
-  {% endfor %}
-</ul>
+    {% endfor %}
+  </ul>
 
-<a href="{% url 'add_comment_to_assignment' assignment.id %}" class="btn btn-primary">Add comment</a>
+  <a href="{% url 'add_comment_to_assignment' assignment.id %}" class="btn btn-primary">Add comment</a>
+  <p>Submitted by: {{ assignment.student.username }}</p>
+  {% if assignment.file %}
+  <p>File: <a href="{{ assignment.file.url }}">Download</a></p>
+  {% endif %}
+  <h3>Comments</h3>
+  <ul>
+    {% for comment in assignment.comments.all %}
+    <li>{{ comment.user.username }}: {{ comment.content }}</li>
+    {% empty %}
+    <li>No comments yet.</li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="{% url 'add_assignment_comment' assignment.id %}">
+    {% csrf_token %}
+    <textarea name="content" required></textarea>
+    <button type="submit">Add Comment</button>
+  </form>
+  <a href="{% url 'assignment_list' %}" class="btn btn-secondary">Înapoi la temele mele</a>
+  <a href="{% url 'task_detail' assignment.task.id %}" class="btn btn-secondary">Vezi task-ul asociat</a>
+{% endblock %}

@@ -31,7 +31,7 @@ def edit_comment(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
-            messages.success(request, "Comentariul a fost modificat.")
+            messages.success(request, "Comment successfully modified.")
             if comment.assignment:
                 return redirect('assignment_detail', assignment_id=comment.assignment.id)
             else:
@@ -53,7 +53,7 @@ def delete_comment(request, comment_id):
             redirect_to = 'task_detail'
             redirect_id = comment.task.id
         comment.delete()
-        messages.success(request, "Comentariul a fost șters.")
+        messages.success(request, "Comment deleted successfully.")
         return redirect(redirect_to, redirect_id)
     return render(request, 'comments/confirm_delete.html', {'comment': comment})
 
@@ -67,7 +67,7 @@ def add_comment_to_assignment(request, assignment_id):
             comment.user = request.user
             comment.assignment = assignment
             comment.save()
-            messages.success(request, "Comentariul a fost adăugat.")
+            messages.success(request, "Comment added successfully.")
             return redirect('assignment_detail', assignment_id=assignment.id)
     else:
         form = CommentForm()
@@ -83,7 +83,7 @@ def add_comment_to_task(request, task_id):
             comment.user = request.user
             comment.task = task
             comment.save()
-            messages.success(request, "Comentariul a fost adăugat.")
+            messages.success(request, "Comment added successfully.")
             return redirect('task_detail', task_id=task.id)
     else:
         form = CommentForm()

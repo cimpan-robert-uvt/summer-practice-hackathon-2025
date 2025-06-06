@@ -1,0 +1,30 @@
+<h2>Bine ai venit, profesor {{ user.username }}!</h2>
+<nav>
+  <ul>
+    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li><a href="{% url 'task_list' %}">Task-uri de dat</a></li>
+    <li><a href="{% url 'review_assignments' %}">Task-uri completate de studenți</a></li>
+    <li>
+      <form action="{% url 'logout' %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link" style="padding:0; border:none; background:none;">Logout</button>
+      </form>
+    </li>
+  </ul>
+</nav>
+<h3>Caută studenți</h3>
+<form method="get" action="{% url 'search_students' %}">
+  <input type="text" name="q" placeholder="Nume student">
+  <button type="submit">Caută</button>
+</form>
+<h3>Task-uri create</h3>
+<ul>
+  {% for task in teacher_tasks %}
+    <li>
+      <a href="{% url 'task_detail' task.id %}">{{ task.title }}</a>
+      — pentru student: <strong>{{ task.assigned_to.username }}</strong>
+    </li>
+  {% empty %}
+    <li>Nu ai creat încă task-uri.</li>
+  {% endfor %}
+</ul>

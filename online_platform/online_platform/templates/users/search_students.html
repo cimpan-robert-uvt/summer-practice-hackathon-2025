@@ -1,0 +1,16 @@
+<h2>Rezultate căutare studenți</h2>
+<form method="get" action="{% url 'search_students' %}">
+    <input type="text" name="q" placeholder="Nume student" value="{{ query }}">
+    <button type="submit">Caută</button>
+</form>
+<ul>
+  {% for student in students %}
+    <li>
+      {{ student.username }} ({{ student.email }})
+      <a href="{% url 'create_task_for_student' student.id %}" class="btn btn-sm btn-primary">Adaugă task</a>
+    </li>
+  {% empty %}
+    <li>Niciun student găsit.</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'dashboard' %}">Înapoi la dashboard</a>
